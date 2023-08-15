@@ -6,4 +6,4 @@ to a folder called "Extracted_x"
 please take caution when using this code, 
 it has no security written
 in the code, so it will extract anything
-that is a zip file
+that is a zip file that get downloaded to your "Downloads folder"
