@@ -22,13 +22,15 @@ class Watcher:
         self.observer.join()
 
 class Handler(FileSystemEventHandler):
-    def process(self, event, path=None):
+    extraction_count = 0
+
+    def on_moved(self, event):
         if event.is_directory:
             return None
-        
-        file_path = path or event.src_path
+
+        file_path = event.dest_path
         print(f"Detected file event ({event.event_type}): {file_path}")
-        
+
         if file_path.endswith('.zip'):
             time.sleep(1)  # A short delay to ensure the .zip file is fully written.
             try:
@@ -36,20 +38,15 @@ class Handler(FileSystemEventHandler):
             except Exception as e:
                 print(f"Failed to unzip {file_path}. Error: {e}")
 
-    def on_created(self, event):
-        self.process(event)
-
-    def on_modified(self, event):
-        self.process(event)
-
-    def on_moved(self, event):
-        self.process(event, path=event.dest_path)
-
     def unzip_file(self, zip_path):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            unzip_dir = os.path.dirname(zip_path)
-            zip_ref.extractall(unzip_dir)
-            print(f"Extracted {zip_path} to {unzip_dir}")
+            Handler.extraction_count += 1
+            base_unzip_dir = os.path.dirname(zip_path)
+            specific_unzip_dir = os.path.join(base_unzip_dir, f"Extracted_{Handler.extraction_count}")
+            os.makedirs(specific_unzip_dir, exist_ok=True)
+
+            zip_ref.extractall(specific_unzip_dir)
+            print(f"Extracted {zip_path} to {specific_unzip_dir}")
 
 if __name__ == "__main__":
     w = Watcher("C:\\Users\\fab.automation\\Downloads")
