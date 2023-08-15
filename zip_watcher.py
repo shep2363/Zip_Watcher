@@ -22,19 +22,19 @@ class Watcher:
         self.observer.join()
 
 class Handler(FileSystemEventHandler):
-    def process(self, event):
+    def process(self, event, path=None):
         if event.is_directory:
             return None
         
-        print(f"Detected file event ({event.event_type}): {event.src_path}")
+        file_path = path or event.src_path
+        print(f"Detected file event ({event.event_type}): {file_path}")
         
-        if event.src_path.endswith('.zip'):
-            # Adding a short delay might help ensure the .zip file is completely written before processing.
-            time.sleep(3)
+        if file_path.endswith('.zip'):
+            time.sleep(1)  # A short delay to ensure the .zip file is fully written.
             try:
-                self.unzip_file(event.src_path)
+                self.unzip_file(file_path)
             except Exception as e:
-                print(f"Failed to unzip {event.src_path}. Error: {e}")
+                print(f"Failed to unzip {file_path}. Error: {e}")
 
     def on_created(self, event):
         self.process(event)
@@ -43,9 +43,7 @@ class Handler(FileSystemEventHandler):
         self.process(event)
 
     def on_moved(self, event):
-        # For moved event, the destination path is more relevant
-        event.src_path = event.dest_path
-        self.process(event)
+        self.process(event, path=event.dest_path)
 
     def unzip_file(self, zip_path):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
