@@ -11,7 +11,6 @@ class Watcher:
 
     def run(self):
         event_handler = Handler()
-        # Set recursive to False if you only want to watch the main directory
         self.observer.schedule(event_handler, self.DIRECTORY_TO_WATCH, recursive=True)
         self.observer.start()
         print(f"Watching directory: {self.DIRECTORY_TO_WATCH}")
@@ -26,15 +25,26 @@ class Handler(FileSystemEventHandler):
     def process(self, event):
         if event.is_directory:
             return None
-        elif event.event_type == 'created':
-            print(f"Detected new file: {event.src_path}")
-            if event.src_path.endswith('.zip'):
-                try:
-                    self.unzip_file(event.src_path)
-                except Exception as e:
-                    print(f"Failed to unzip {event.src_path}. Error: {e}")
+        
+        print(f"Detected file event ({event.event_type}): {event.src_path}")
+        
+        if event.src_path.endswith('.zip'):
+            # Adding a short delay might help ensure the .zip file is completely written before processing.
+            time.sleep(1)
+            try:
+                self.unzip_file(event.src_path)
+            except Exception as e:
+                print(f"Failed to unzip {event.src_path}. Error: {e}")
 
     def on_created(self, event):
+        self.process(event)
+
+    def on_modified(self, event):
+        self.process(event)
+
+    def on_moved(self, event):
+        # For moved event, the destination path is more relevant
+        event.src_path = event.dest_path
         self.process(event)
 
     def unzip_file(self, zip_path):
