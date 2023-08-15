@@ -59,5 +59,5 @@ class Handler(FileSystemEventHandler):
 
 if __name__ == "__main__":
     # Set up a watcher on the Downloads directory and start it.
-    w = Watcher(os.path.expanduser('~/Downloads'))
+    w = Watcher("C:\\Users\\fab.automation\\Downloads")
     w.run()
