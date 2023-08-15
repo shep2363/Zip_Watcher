@@ -30,7 +30,7 @@ class Handler(FileSystemEventHandler):
         
         if event.src_path.endswith('.zip'):
             # Adding a short delay might help ensure the .zip file is completely written before processing.
-            time.sleep(1)
+            time.sleep(3)
             try:
                 self.unzip_file(event.src_path)
             except Exception as e:
